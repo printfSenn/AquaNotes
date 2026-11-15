@@ -53,11 +53,35 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: 
 .tog { position: fixed; top: calc(26px + env(safe-area-inset-top, 0px)); right: 26px; z-index: 5; font: 500 13px system-ui, -apple-system, "Segoe UI", sans-serif;
   color: #fff; background: rgba(5,30,46,.55); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
 .none { opacity: .7; text-align: center; padding: 18px 8px; }
-@media (max-width: 640px) { .app { flex-direction: column; height: 70vh; }
-  .side { width: auto; height: 42%; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.14); }
-  .setbox { max-height: 52%; padding: 8px 10px; gap: 6px; }
-  .syncbox { gap: 5px; }
-  .syncbox input { padding: 6px 8px; }
+@media (max-width: 640px) {
+  .app { left: 50%; top: 10px; width: calc(100vw - 20px); height: calc(100vh - 20px); max-height: none; transform: translateX(-50%); flex-direction: column; border-radius: 16px; font-size: 15px; }
+  .side { width: auto; height: 44%; min-height: 290px; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.14); }
+  .sh { padding: 12px; gap: 9px; }
+  .sh input, .sh button, .app .sbar select { min-height: 40px; box-sizing: border-box; }
+  .sh input { font-size: 15px; }
+  .sh button { padding: 8px 15px; white-space: nowrap; }
+  .chips { gap: 7px; padding-bottom: 9px; }
+  .chips button { min-height: 34px; padding: 5px 12px; font-size: 14px; }
+  .sbar { padding-bottom: 8px; }
+  .sbar select { font-size: 14px; }
+  .setbox { max-height: 54%; padding: 9px 10px; gap: 7px; }
+  .setbox label { min-height: 36px; font-size: 14px; }
+  .setbox select { min-height: 36px; font-size: 14px; }
+  .setbox input[type=checkbox] { width: 22px; height: 22px; }
+  .syncbox { gap: 6px; }
+  .syncbox input { min-height: 40px; padding: 8px 9px; font-size: 14px; }
+  .sync-actions button, .setbox > button { min-height: 38px; font-size: 13px; }
+  .sfoot { flex-wrap: wrap; padding: 8px 10px; }
+  .sfoot button { flex: 1 1 auto; min-height: 38px; padding: 7px 10px; }
+  .main { min-height: 0; padding: 10px; gap: 8px; }
+  .tb { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+  .app .tb button { flex: 0 0 auto; min-height: 40px; padding: 8px 13px; font-size: 14px; }
+  .main textarea { min-height: 150px; font-size: 16px; }
+  .row { flex-wrap: wrap; gap: 7px; }
+  .row input { min-height: 40px; box-sizing: border-box; font-size: 14px; }
+  #tags { flex: 1 1 100%; }
+  #folder, #goal, #due { flex: 1 1 30%; width: auto; }
+  .tog { top: 18px; right: 18px; padding: 9px 13px; font-size: 13px; }
 }
 .sbar { display: flex; justify-content: space-between; align-items: center; padding: 0 14px 6px; font-size: 12px; opacity: .9; }
 .app select { font: inherit; font-size: 12px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 8px; padding: 3px 6px; }
