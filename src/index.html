@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0a3a4a">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AquaNotes</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/notes.css">
+<link rel="stylesheet" href="css/pool.css">
+<link rel="stylesheet" href="css/lock.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="rim"></div>
+<div id="pool" hidden></div>
+<div class="app">
+  <div class="side">
+    <div class="sh"><input id="q" type="search" placeholder="Search (Ctrl+K)"><button class="pri" id="newb">+ New</button></div>
+    <div class="chips" id="chips"></div>
+    <div class="sw" id="sw" hidden></div>
+    <div class="sbar"><select id="fsel"></select><select id="sort"><option value="recent">Edited</option><option value="created">Newest</option><option value="az">A to Z</option><option value="due">Deadline</option></select><span id="cnt2"></span></div>
+    <div class="list" id="list"></div>
+    <div class="impbox" id="impbox" hidden><textarea id="imp" placeholder="Paste backup text here"></textarea><div class="sfoot"><button class="pri" id="mergeb">Merge</button><button id="cancelb">Cancel</button></div></div>
+    <div class="setbox" id="setbox" hidden>
+      <label>Theme <select id="theme"><option value="water">Water glass</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+      <label>Font size <input id="fs" type="range" min="12" max="24" step="1"><span id="fsv"></span></label>
+      <label>Tag colors <select id="tagmode"><option value="auto">Auto</option><option value="none">None</option></select></label>
+      <label>Auto-lock <select id="autolock"><option value="1">After 1 min idle</option><option value="5">After 5 min idle</option><option value="15">After 15 min idle</option><option value="30">After 30 min idle</option></select></label>
+      <label>Sync across devices <input id="syncon" type="checkbox"></label>
+      <div class="syncst" id="syncst"></div>
+      <div class="syncbox">
+        <div class="sync-title">Sync account</div>
+        <input id="syncEmail" type="email" placeholder="Account email" autocomplete="username">
+        <input id="syncPassword" type="password" placeholder="Account password (8+ characters)" autocomplete="current-password">
+        <input id="syncServer" type="url" placeholder="Backend URL (blank = this site)" spellcheck="false">
+        <div class="sync-actions"><button class="pri" id="syncLogin">Sign in</button><button id="syncRegister">Register</button><button id="syncLogout">Sign out</button></div>
+        <div class="syncmsg" id="syncAuthMsg"></div>
+      </div>
+      <button id="delcloud">Delete cloud copy</button>
+      <button id="chtog">Change passphrase</button>
+      <div class="chpanel" id="chpanel" hidden>
+        <input id="chcur" type="password" placeholder="Current passphrase" autocomplete="current-password" spellcheck="false">
+        <input id="chnew" type="password" placeholder="New passphrase (min 8 characters)" autocomplete="new-password" spellcheck="false">
+        <input id="chnew2" type="password" placeholder="Repeat new passphrase" autocomplete="new-password" spellcheck="false">
+        <div class="meter"><i id="chmeter"></i></div>
+        <div class="chnote">The old passphrase stops working. With sync on, your other devices ask for the new one once, so let them finish syncing first.</div>
+        <div class="chrow"><button class="pri" id="chgo">Change</button><button id="chcancel">Cancel</button></div>
+        <div class="chm" id="chm"></div>
+      </div>
+    </div>
+    <div class="sfoot"><button id="expb" title="Copies your notes as plain, unencrypted text">Export (plain text)</button><button id="impb">Import</button><button id="setb">Settings</button></div>
+  </div>
+  <div class="main">
+    <div class="tb"><button id="focusb">Focus</button><button id="prevb">Preview</button><button id="pinb">Pin</button><button id="copyb">Copy</button><button id="delb">Delete</button></div>
+    <textarea id="body" placeholder="Write an idea. The first line becomes the title."></textarea>
+    <div class="pv" id="pv" hidden></div>
+    <div class="row"><input id="tags" placeholder="Tags, separated by commas"><input id="folder" list="folders" placeholder="Folder"><datalist id="folders"></datalist><input id="goal" type="number" min="0" placeholder="Goal" title="Word goal"><input id="due" type="date" title="Deadline: the closer it gets, the wetter the paper"></div>
+    <div class="bar" id="bar" hidden><i id="barfill"></i></div>
+    <div class="ft"><span id="wc">0 words</span><span id="st"></span></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<button class="tog" id="lockb">Lock</button>
+<button class="tog" id="poolb">Pool view</button>
+<button class="tog" id="tog">Hide notes</button>
+<div class="hint" id="hint">move your mouse across the water</div>
+<footer class="site-footer">Copyright &copy; 2026 AquaNotes</footer>
+<div class="lock" id="lock">
+  <div class="lockcard">
+    <div class="lt" id="lt">Notes locked</div>
+    <div class="ls" id="ls"></div>
+    <input id="pw" type="password" autocomplete="off" placeholder="Passphrase" spellcheck="false">
+    <input id="pw2" type="password" autocomplete="off" placeholder="Repeat passphrase" spellcheck="false" hidden>
+    <div class="meter" id="meter" hidden><i id="meterfill"></i></div>
+    <button class="pri" id="unlockb">Unlock</button>
+    <div class="lm" id="lm"></div>
+    <div class="lock-sync">
+      <div class="lock-sync-title">Sync account (optional)</div>
+      <input id="lockSyncEmail" type="email" placeholder="Account email" autocomplete="username">
+      <input id="lockSyncPassword" type="password" placeholder="Account password" autocomplete="current-password">
+      <input id="lockSyncServer" type="url" placeholder="Backend URL (blank = this site)" spellcheck="false">
+      <div class="lock-sync-actions"><button id="lockSyncLogin">Sign in</button><button id="lockSyncRegister">Register</button></div>
+      <div class="lock-sync-msg" id="lockSyncMsg"></div>
+    </div>
+    <button class="lnk" id="resetb" hidden>Forgot passphrase?</button>
+  </div>
+</div>
+<script src="js/water.js"></script>
+<script src="js/cipher.js"></script>
+<script src="js/deadline.js"></script>
+<script src="js/ice.js"></script>
+<script src="js/paper.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
