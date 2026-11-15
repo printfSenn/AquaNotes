@@ -1,0 +1,17 @@
+{
+  "name": "aquanotes",
+  "version": "1.0.0",
+  "description": "AquaNotes is an encrypted note vault that floats on a pool of simulated water.",
+  "private": true,
+  "scripts": {
+    "dev": "node tools/serve.mjs src --live",
+    "dev:open": "node tools/serve.mjs src --live --open",
+    "sync-server": "node tools/sync-server.mjs src",
+    "sync-server:dist": "node tools/sync-server.mjs dist",
+    "build": "node build.mjs",
+    "preview": "node build.mjs && node tools/serve.mjs dist",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "node tools/run-e2e.mjs",
+    "test": "npm run build && npm run test:unit && npm run test:e2e"
+  }
+}
