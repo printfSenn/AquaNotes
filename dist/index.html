@@ -109,6 +109,18 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: 
 .app .swb.sel { border-color: #fff; }
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
 .setbox { display: grid; gap: 8px; min-height: 0; max-height: 48%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); font-size: 12px; }
+.sethead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sethead strong { font-size: 18px; }
+.sethead button { min-height: 36px; padding: 6px 14px; }
+.app.settings-open .setbox { position: absolute; inset: 0; z-index: 8; display: grid; align-content: start; max-height: none; height: 100%; box-sizing: border-box; padding: 18px 20px; overflow-y: auto; background: rgba(5,30,46,.97); border: 0; font-size: 15px; }
+.app.settings-open .sethead { position: sticky; top: -18px; z-index: 1; padding: 2px 0 12px; background: rgba(5,30,46,.97); }
+.app.settings-open .sethead strong { font-size: 22px; }
+.app.settings-open .setbox label { min-height: 44px; font-size: 16px; }
+.app.settings-open .setbox select { min-height: 42px; font-size: 15px; }
+.app.settings-open .setbox input[type=checkbox] { width: 24px; height: 24px; }
+.app.settings-open .syncbox input { min-height: 42px; font-size: 15px; }
+.app.settings-open .setbox > button, .app.settings-open .sync-actions button { min-height: 42px; font-size: 14px; }
+.app.light.settings-open .setbox, .app.light.settings-open .sethead { background: rgba(244,250,252,.98); }
 .setbox label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .setbox select { flex: 1; max-width: 62%; }
 .syncbox { display: grid; gap: 6px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.1); }
@@ -254,6 +266,7 @@ box-shadow: 0 0 22px rgba(200,235,255,.95), inset 0 0 14px rgba(255,255,255,.6);
     <div class="list" id="list"></div>
     <div class="impbox" id="impbox" hidden><textarea id="imp" placeholder="Paste backup text here"></textarea><div class="sfoot"><button class="pri" id="mergeb">Merge</button><button id="cancelb">Cancel</button></div></div>
     <div class="setbox" id="setbox" hidden>
+      <div class="sethead"><strong>Settings</strong><button id="setclose">Done</button></div>
       <label>Theme <select id="theme"><option value="water">Water glass</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
       <label>Font size <input id="fs" type="range" min="12" max="24" step="1"><span id="fsv"></span></label>
       <label>Tag colors <select id="tagmode"><option value="auto">Auto</option><option value="none">None</option></select></label>
@@ -1140,7 +1153,9 @@ $('focusb').onclick = function () { setFocus(!app.classList.contains('focus')); 
 $('fsel').onchange = function () { folderF = this.value; renderList(); };
 $('folder').oninput = function () { if (!now) return; now.folder = this.value.trim(); dirty(); };
 $('goal').oninput = function () { if (!now) return; var g = parseInt(this.value, 10); now.goal = g > 0 ? g : 0; count(); dirty(); };
-$('setb').onclick = function () { $('setbox').hidden = !$('setbox').hidden; };
+function closeSettings() { $('setbox').hidden = true; app.classList.remove('settings-open'); }
+$('setb').onclick = function () { var open = $('setbox').hidden; $('setbox').hidden = !open; app.classList.toggle('settings-open', open); };
+$('setclose').onclick = closeSettings;
 $('theme').onchange = function () { prefs.theme = this.value; applyPrefs(); savePrefs(); };
 $('fs').oninput = function () { prefs.fs = +this.value; applyPrefs(); savePrefs(); };
 $('tagmode').onchange = function () { prefs.tagMode = this.value; savePrefs(); renderTags(); renderList(); };
@@ -1406,7 +1421,7 @@ function showLock(m, animate) {
 function hideLock() { Water.frozen = false; clearTimeout(frzTm); setInert(false); Ice.shatter(lockEl); }
 function wipeUI() {
   notes = []; now = null; trash = null; preview = false; folderF = ''; tagF = ''; qs = ''; lastSer = {}; lastSet = ''; prefs.tagColors = {};
-  $('q').value = ''; body.hidden = false; pv.hidden = true; prevB.textContent = 'Preview'; toast.hidden = true; impBox.hidden = true; imp.value = ''; $('setbox').hidden = true;
+  $('q').value = ''; body.hidden = false; pv.hidden = true; prevB.textContent = 'Preview'; toast.hidden = true; impBox.hidden = true; imp.value = ''; closeSettings();
   ['chcur', 'chnew', 'chnew2'].forEach(function (id) { $(id).value = ''; }); $('chpanel').hidden = true; chMsg('');
   setFocus(false); fill(); renderList(); renderTags();
   Object.keys(cardEls).forEach(function (id) { cardEls[id].remove(); delete cardEls[id]; }); phys = {};

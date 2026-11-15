@@ -245,7 +245,9 @@ $('focusb').onclick = function () { setFocus(!app.classList.contains('focus')); 
 $('fsel').onchange = function () { folderF = this.value; renderList(); };
 $('folder').oninput = function () { if (!now) return; now.folder = this.value.trim(); dirty(); };
 $('goal').oninput = function () { if (!now) return; var g = parseInt(this.value, 10); now.goal = g > 0 ? g : 0; count(); dirty(); };
-$('setb').onclick = function () { $('setbox').hidden = !$('setbox').hidden; };
+function closeSettings() { $('setbox').hidden = true; app.classList.remove('settings-open'); }
+$('setb').onclick = function () { var open = $('setbox').hidden; $('setbox').hidden = !open; app.classList.toggle('settings-open', open); };
+$('setclose').onclick = closeSettings;
 $('theme').onchange = function () { prefs.theme = this.value; applyPrefs(); savePrefs(); };
 $('fs').oninput = function () { prefs.fs = +this.value; applyPrefs(); savePrefs(); };
 $('tagmode').onchange = function () { prefs.tagMode = this.value; savePrefs(); renderTags(); renderList(); };
@@ -511,7 +513,7 @@ function showLock(m, animate) {
 function hideLock() { Water.frozen = false; clearTimeout(frzTm); setInert(false); Ice.shatter(lockEl); }
 function wipeUI() {
   notes = []; now = null; trash = null; preview = false; folderF = ''; tagF = ''; qs = ''; lastSer = {}; lastSet = ''; prefs.tagColors = {};
-  $('q').value = ''; body.hidden = false; pv.hidden = true; prevB.textContent = 'Preview'; toast.hidden = true; impBox.hidden = true; imp.value = ''; $('setbox').hidden = true;
+  $('q').value = ''; body.hidden = false; pv.hidden = true; prevB.textContent = 'Preview'; toast.hidden = true; impBox.hidden = true; imp.value = ''; closeSettings();
   ['chcur', 'chnew', 'chnew2'].forEach(function (id) { $(id).value = ''; }); $('chpanel').hidden = true; chMsg('');
   setFocus(false); fill(); renderList(); renderTags();
   Object.keys(cardEls).forEach(function (id) { cardEls[id].remove(); delete cardEls[id]; }); phys = {};
