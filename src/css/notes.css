@@ -1,0 +1,97 @@
+.app { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(760px, 94vw); height: min(480px, 68vh);
+  display: flex; border-radius: 20px; overflow: hidden; background: rgba(5,30,46,.55); border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 14px 50px rgba(0,20,40,.4); color: #fff; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.side { width: 280px; flex: none; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,.14); background: rgba(0,20,34,.25); }
+.sh { display: flex; gap: 8px; padding: 12px; align-items: center; }
+.sh input { flex: 1; min-width: 0; }
+.app input, .app textarea { font: inherit; color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 8px 10px; outline: none; }
+.app input::placeholder, .app textarea::placeholder { color: rgba(255,255,255,.5); }
+.app input:focus, .app textarea:focus { border-color: rgba(255,255,255,.65); }
+.app button { font: inherit; font-size: 13px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.app button:hover { background: rgba(255,255,255,.2); }
+.app .pri, .app .chips button.on { background: #fff; color: #06324a; font-weight: 600; border-color: transparent; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 12px 8px; }
+.chips button { padding: 3px 10px; font-size: 12px; }
+.list { flex: 1; overflow: auto; padding: 0 8px 8px; }
+.item { padding: 9px 10px; border-radius: 10px; cursor: pointer; margin-bottom: 2px; }
+.item:hover { background: rgba(255,255,255,.08); }
+.item.sel { background: rgba(255,255,255,.18); }
+.it { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.is { font-size: 12px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 12px; gap: 8px; }
+.tb { display: flex; gap: 8px; justify-content: flex-end; }
+.main textarea { flex: 1; resize: none; line-height: 1.55; font-size: 15px; }
+.ft { display: flex; justify-content: space-between; font-size: 12px; opacity: .7; }
+.app.off { display: none; }
+.tog { position: fixed; top: calc(26px + env(safe-area-inset-top, 0px)); right: 26px; z-index: 5; font: 500 13px system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #fff; background: rgba(5,30,46,.55); border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.none { opacity: .7; text-align: center; padding: 18px 8px; }
+@media (max-width: 640px) { .app { flex-direction: column; height: 70vh; }
+  .side { width: auto; height: 42%; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.14); } }
+.sbar { display: flex; justify-content: space-between; align-items: center; padding: 0 14px 6px; font-size: 12px; opacity: .9; }
+.app select { font: inherit; font-size: 12px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 8px; padding: 3px 6px; }
+.app select option { color: #06324a; }
+.sfoot { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,.12); }
+.sfoot button { padding: 4px 12px; font-size: 12px; }
+.impbox { border-top: 1px solid rgba(255,255,255,.12); }
+.impbox textarea { width: calc(100% - 24px); margin: 8px 12px 0; height: 80px; font-size: 12px; box-sizing: border-box; resize: none; }
+.impbox .sfoot { border-top: 0; }
+.pv { flex: 1; overflow: auto; padding: 10px 12px; border: 1px solid rgba(255,255,255,.2); border-radius: 10px; background: rgba(255,255,255,.06); font-size: 15px; line-height: 1.55; }
+.pv[hidden], .impbox[hidden], .toast[hidden] { display: none; }
+.pv .h1 { font-size: 22px; font-weight: 700; margin: 4px 0; } .pv .h2 { font-size: 18px; font-weight: 700; } .pv .h3 { font-size: 16px; font-weight: 600; }
+.pv .gap { height: 8px; } .pv .chk { display: flex; gap: 8px; align-items: flex-start; } .pv .chk input { margin-top: 5px; }
+.pv .done { text-decoration: line-through; opacity: .6; }
+.pv a { color: #9fe0ff; } .pv code { background: rgba(255,255,255,.15); padding: 1px 5px; border-radius: 5px; font-size: 13px; }
+.toast { position: fixed; left: 50%; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 6; background: rgba(5,30,46,.9);
+  color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 8px 8px 8px 16px; font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; white-space: nowrap; }
+.toast button { margin-left: 6px; font: inherit; color: #06324a; background: #fff; border: 0; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-weight: 600; }
+.sbar { gap: 6px; }
+.sbar select { flex: 1; min-width: 0; }
+#cnt2 { white-space: nowrap; }
+.sw { display: flex; align-items: center; gap: 6px; padding: 0 12px 8px; font-size: 12px; flex-wrap: wrap; }
+.sw[hidden], .setbox[hidden], .bar[hidden] { display: none; }
+.app .swb { width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
+.app .swb.sel { border-color: #fff; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+.setbox { display: grid; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); font-size: 12px; }
+.setbox label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.setbox select { flex: 1; max-width: 62%; }
+.syncbox { display: grid; gap: 6px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.1); }
+.sync-title { font-weight: 600; }
+.syncbox input { width: 100%; box-sizing: border-box; font-size: 12px; padding: 6px 8px; }
+.sync-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.sync-actions button { padding: 4px 9px; font-size: 11px; }
+.syncmsg { min-height: 15px; font-size: 11px; opacity: .78; } .syncmsg.bad { color: #ff9b9b; }
+.app .setbox input[type=range] { flex: 1; padding: 0; border: 0; background: transparent; }
+.tb { flex-wrap: wrap; }
+.app .tb button { padding: 6px 11px; }
+.row { display: flex; gap: 8px; }
+.row input { min-width: 0; }
+#tags { flex: 1; } #folder { width: 112px; } #goal { width: 74px; }
+.bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.15); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: #4dabf7; transition: width .3s; }
+.bar i.ok { background: #51cf66; }
+.main textarea, .pv { font-size: var(--fs, 15px); }
+.app.focus { left: 14px; top: 14px; right: 14px; bottom: 14px; width: auto; height: auto; transform: none; border-radius: 16px; background: rgba(5,30,46,.84); }
+.app.focus .side { display: none; }
+.app.focus .main { max-width: 860px; margin: 0 auto; width: 100%; padding: 18px; }
+.app.focus .main textarea { font-size: calc(var(--fs, 15px) + 2px); line-height: 1.7; }
+body.focusing .tog { display: none; }
+.app.light { background: rgba(244,250,252,.92); color: #0a2a3c; border-color: rgba(0,40,70,.2); }
+.app.light .side { background: rgba(0,60,90,.06); border-color: rgba(0,40,70,.15); }
+.app.light input, .app.light textarea, .app.light select { color: #0a2a3c; background: rgba(0,50,80,.06); border-color: rgba(0,40,70,.22); }
+.app.light input::placeholder, .app.light textarea::placeholder { color: rgba(10,42,60,.5); }
+.app.light button { color: #0a2a3c; background: rgba(0,50,80,.07); border-color: rgba(0,40,70,.25); }
+.app.light button:hover { background: rgba(0,50,80,.14); }
+.app.light .pri, .app.light .chips button.on { background: #0a4a6a; color: #fff; }
+.app.light .item:hover { background: rgba(0,50,80,.06); }
+.app.light .item.sel { background: rgba(0,50,80,.13); }
+.app.light .pv { background: rgba(0,50,80,.05); border-color: rgba(0,40,70,.2); }
+.app.light .pv a { color: #0b6aa8; } .app.light .pv code { background: rgba(0,50,80,.1); }
+.app.light .sfoot, .app.light .impbox, .app.light .setbox { border-color: rgba(0,40,70,.15); }
+.app.light .bar { background: rgba(0,50,80,.12); }
+.app.light .swb.sel { border-color: #0a2a3c; }
+.app.dark { background: rgba(8,16,24,.94); }
+.app .swb.none { background: transparent; border: 2px solid rgba(255,255,255,.55); font-size: 12px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+.app .swb.none.sel { border-color: #fff; background: rgba(255,255,255,.2); }
+.app.light .swb.none { border-color: rgba(0,40,70,.5); } .app.light .swb.none.sel { border-color: #0a2a3c; background: rgba(0,50,80,.12); }
