@@ -43,7 +43,7 @@
 
   function blurFloor() {
     var w = GW, h = GH, tmp = new Uint8ClampedArray(bg.length), x, y, c;
-    for (var pass = 0; pass < 2; pass++) {
+    for (var pass = 0; pass < 1; pass++) {
       for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
         var xm = x > 0 ? x - 1 : x, xp = x < w - 1 ? x + 1 : x;
         for (c = 0; c < 3; c++) tmp[(y * w + x) * 3 + c] = (bg[(y * w + xm) * 3 + c] + bg[(y * w + x) * 3 + c] + bg[(y * w + xp) * 3 + c]) / 3;
@@ -57,19 +57,27 @@
   function buildFloor() { buildFloor0(); blurFloor(); }
   function buildFloor0() {
     bg = new Uint8ClampedArray(GW * GH * 3);
-    var Tl = Math.max(8, Math.round(70 / CELL));
+    // small pool mosaic tiles with thin light grout, lane lines on the floor
+    var Tl = Math.max(5, Math.round(24 / CELL));
+    var lane = Math.max(2, Math.round(10 / CELL));
     for (var y = 0; y < GH; y++) for (var x = 0; x < GW; x++) {
       var tx = Math.floor(x / Tl), ty = Math.floor(y / Tl), gx = x % Tl, gy = y % Tl;
       var n = hash(tx, ty), n2 = hash(x >> 1, y >> 1);
-      var depth = 1 - 0.28 * (y / GH) - 0.18 * Math.abs(x / GW - 0.5);
+      var mott = 0.97 + 0.03 * Math.sin(x * 0.07 + y * 0.05) * Math.sin(y * 0.09 - x * 0.03);
+      var depth = 1 - 0.1 * (y / GH) - 0.06 * Math.abs(x / GW - 0.5);
+      var inLane = Math.abs(x - GW * 0.25) < lane || Math.abs(x - GW * 0.75) < lane || Math.abs(y - GH * 0.5) < lane;
       var r, g, b;
-      if (gx < 1 || gy < 1) { r = 110; g = 165; b = 180; }
-      else {
-        var e = Math.min(gx, gy, Tl - gx, Tl - gy), bev = e < 3 ? 0.9 + e * 0.035 : 1;
-        var gr = 0.97 + n2 * 0.06;
-        r = (40 + n * 16) * bev * gr; g = (160 + n * 20) * bev * gr; b = (180 + n * 14) * bev * gr;
+      if (gx < 1 || gy < 1) {
+        // grout
+        if (inLane) { r = 120; g = 170; b = 215; } else { r = 205; g = 232; b = 245; }
+      } else {
+        var e = Math.min(gx, gy, Tl - gx, Tl - gy), bev = e < 2 ? 0.95 + e * 0.025 : 1;
+        var gr = (0.985 + n2 * 0.03) * mott * bev;
+        var tv = (n - 0.5) * 14;
+        if (inLane) { r = 25 + tv * 0.4; g = 85 + tv * 0.8; b = 165 + tv * 0.8; }
+        else { r = 175 + tv; g = 222 + tv * 0.5; b = 244 + tv * 0.3; }
+        r *= gr; g *= gr; b *= gr;
       }
-      if (Math.abs(x - GW * 0.25) < 2.5 || Math.abs(x - GW * 0.75) < 2.5 || Math.abs(y - GH * 0.5) < 2.5) { r = 25; g = 70; b = 120; }
       var i = (y * GW + x) * 3;
       bg[i] = r * depth; bg[i+1] = g * depth; bg[i+2] = b * depth;
     }
@@ -102,7 +110,7 @@
         var x = cx2 * 2;
         var l1 = 1 - Math.abs(Math.sin(x * 0.09 + T * 0.9 + rin)); l1 *= l1; l1 *= l1;
         var l2 = 1 - Math.abs(Math.sin(a2 + colIn[cx2])); l2 *= l2; l2 *= l2;
-        cau[cy * CW + cx2] = (l1 + l2) * 18;
+        cau[cy * CW + cx2] = (l1 + l2) * 15;
       }
     }
   }
@@ -137,11 +145,11 @@
         var fg = bg[fi(x + ox, y + oy) + 1] + cl;
         var fb = bg[fi(x + ox * 1.02, y + oy * 1.02) + 2] + cl;
         // water absorption
-        fr = fr * 0.45 + 6; fg = fg * 0.55 + 30; fb = fb * 0.75 + 55;
+        fr = fr * 0.14 + 2; fg = fg * 0.5 + 8; fb = fb * 0.9 + 25;
         // fresnel and sky reflection
-        var p = 1 - nz, F = 0.09 + p * (0.8 + p * 1.5); if (F > 0.5) F = 0.5;
+        var p = 1 - nz, F = 0.05 + p * (0.8 + p * 1.5); if (F > 0.4) F = 0.4;
         var u = 0.5 + (-nx * 0.6 - ny * 0.8) * 2.5; u = u < 0 ? 0 : u > 1 ? 1 : u;
-        var sr = 60 + 155 * u, sg = 120 + 112 * u, sb = 190 + 52 * u;
+        var sr = 55 + 110 * u, sg = 120 + 105 * u, sb = 210 + 45 * u;
         // sun glint
         var t = nx * HX + ny * HY + nz * HZ; t = t < 0 ? 0 : t;
         var t2 = t * t, t4 = t2 * t2, t8 = t4 * t4, t16 = t8 * t8, t32 = t16 * t16, t64 = t32 * t32, t128 = t64 * t64;
@@ -149,9 +157,9 @@
         // white water on sharp crests
         var fo = Math.abs(lap) > 40 ? (Math.abs(lap) - 40) * 0.4 : 0; if (fo > 30) fo = 30;
         var o = i * 4;
-        d[o]   = fr * (1 - F) + sr * F + spec + fo + 3;
-        d[o+1] = fg * (1 - F) + sg * F + spec + fo + 9;
-        d[o+2] = fb * (1 - F) + sb * F + spec + fo + 13;
+        d[o]   = fr * (1 - F) + sr * F + spec + fo + 0;
+        d[o+1] = fg * (1 - F) + sg * F + spec + fo + 4;
+        d[o+2] = fb * (1 - F) + sb * F + spec + fo + 8;
         d[o+3] = 255;
       }
     }
