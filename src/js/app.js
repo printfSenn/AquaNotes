@@ -209,7 +209,11 @@ function tagColor(t) {
   return PALETTE[h % PALETTE.length];
 }
 function applyPrefs() {
+  if (prefs.theme === 'night') { prefs.theme = 'dark'; prefs.night = true; }
   app.classList.toggle('light', prefs.theme === 'light'); app.classList.toggle('dark', prefs.theme === 'dark');
+  Water.style = prefs.wstyle === 'pond' ? 'pond' : 'pool'; Water.pads = prefs.pads !== false; Water.night = !!prefs.night; Water.rain = !!prefs.rain; Water.koi = prefs.koi !== false; Water.depth = prefs.depth !== false;
+  document.body.classList.toggle('night', !!prefs.night); document.body.classList.toggle('pond', prefs.wstyle === 'pond');
+  $('wstyle').value = prefs.wstyle === 'pond' ? 'pond' : 'pool'; $('padsc').checked = prefs.pads !== false; $('nightc').checked = !!prefs.night; $('rainc').checked = !!prefs.rain; $('koic').checked = prefs.koi !== false; $('depthc').checked = prefs.depth !== false;
   app.style.setProperty('--fs', prefs.fs + 'px');
   $('theme').value = prefs.theme; $('fs').value = prefs.fs; $('fsv').textContent = prefs.fs + ' px'; $('tagmode').value = prefs.tagMode === 'none' ? 'none' : 'auto'; $('autolock').value = String(prefs.autolock || 5); $('syncon').checked = prefs.sync !== false; renderSyncAuth();
 }
@@ -248,6 +252,13 @@ $('goal').oninput = function () { if (!now) return; var g = parseInt(this.value,
 function closeSettings() { $('setbox').hidden = true; app.classList.remove('settings-open'); }
 $('setb').onclick = function () { var open = $('setbox').hidden; $('setbox').hidden = !open; app.classList.toggle('settings-open', open); };
 $('setclose').onclick = closeSettings;
+function setSetTab(t) {
+  $('setnotes').hidden = t !== 'notes'; $('setpool').hidden = t !== 'pool';
+  $('settabn').classList.toggle('pri', t === 'notes'); $('settabp').classList.toggle('pri', t === 'pool');
+}
+$('settabn').onclick = function () { setSetTab('notes'); }; $('settabp').onclick = function () { setSetTab('pool'); };
+[['nightc', 'night'], ['rainc', 'rain'], ['koic', 'koi'], ['depthc', 'depth'], ['padsc', 'pads']].forEach(function (p) { $(p[0]).onchange = function () { prefs[p[1]] = this.checked; applyPrefs(); savePrefs(); }; });
+$('wstyle').onchange = function () { prefs.wstyle = this.value; applyPrefs(); savePrefs(); };
 $('theme').onchange = function () { prefs.theme = this.value; applyPrefs(); savePrefs(); };
 $('fs').oninput = function () { prefs.fs = +this.value; applyPrefs(); savePrefs(); };
 $('tagmode').onchange = function () { prefs.tagMode = this.value; savePrefs(); renderTags(); renderList(); };
@@ -268,8 +279,21 @@ function place(n, fx, fy) {
 function openDrawer() { app.classList.remove('off'); $('tog').textContent = 'Hide notes'; }
 function syncLayout() { app.classList.toggle('drawer', poolMode && !app.classList.contains('focus')); }
 function openCard(n) { now = n; n.seen = Date.now(); quietSave(); openDrawer(); fill(); renderList(); }
+function wake(x0, y0, x1, y1) {
+  var dx = x1 - x0, dy = y1 - y0, dist = Math.sqrt(dx * dx + dy * dy); if (dist < 0.5) return;
+  var C = Water.CELL, nx = dx / dist, ny = dy / dist, steps = Math.min(10, Math.max(1, Math.ceil(dist / (C * 2)))), v = Math.min(dist, 40);
+  var amt = (14 + v * 1.4) / Math.sqrt(steps), rad = 2.2 + v * 0.045, ext = Math.abs(nx) * CWD / 2 + Math.abs(ny) * CHT / 2, lat = Math.abs(ny) * CWD / 2 + Math.abs(nx) * CHT / 2;
+  for (var s = 1; s <= steps; s++) {
+    var px = x0 + dx * s / steps, py = y0 + dy * s / steps;
+    for (var k = -1; k <= 1; k++) {
+      var lx = -ny * lat * 0.75 * k, ly = nx * lat * 0.75 * k;
+      Water.disturb((px + nx * ext + lx) / C, (py + ny * ext + ly) / C, rad, amt * (k ? 0.7 : 1));
+      Water.disturb((px - nx * ext + lx) / C, (py - ny * ext + ly) / C, rad * 1.1, -amt * 0.45);
+    }
+  }
+}
 function bindCard(el, id) {
-  var down = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  var down = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0, wx = null, wy = 0;
   el.addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     commitDrift(id);
@@ -286,15 +310,18 @@ function bindCard(el, id) {
     var W = window.innerWidth, H = window.innerHeight;
     el.style.left = Math.min(Math.max(18, e.clientX - ox), W - CWD - 18) + 'px';
     el.style.top = Math.min(Math.max(64, e.clientY - oy), H - CHT - 46) + 'px';
+    var ccx = parseFloat(el.style.left) + CWD / 2, ccy = parseFloat(el.style.top) + CHT / 2;
+    if (wx !== null) wake(wx, wy, ccx, ccy);
+    wx = ccx; wy = ccy;
   });
   function end(e, cancelled) {
-    if (!down) return; down = false; el.classList.remove('drag');
+    if (!down) return; down = false; wx = null; el.classList.remove('drag');
     try { el.releasePointerCapture(e.pointerId); } catch (x) {}
     var n = byId(id); if (!n) return;
     if (moved) {
       var W = window.innerWidth, H = window.innerHeight, x = parseFloat(el.style.left), y = parseFloat(el.style.top);
       n.px = c01((x - 18) / Math.max(1, W - CWD - 36)); n.py = c01((y - 64) / Math.max(1, H - CHT - 110)); n.seen = Date.now();
-      quietSave(); Water.disturb((x + CWD / 2) / Water.CELL, (y + CHT / 2) / Water.CELL, 4.5, 320); renderPool();
+      quietSave(); Water.disturb((x + CWD / 2) / Water.CELL, (y + CHT / 2) / Water.CELL, 3, 60); var ph = physOf(id); ph.vx = ph.vy = ph.wz = 0; ph.settle = performance.now(); renderPool();
     } else if (!cancelled) openCard(n);
   }
   el.addEventListener('pointerup', function (e) { end(e, false); });
@@ -337,7 +364,7 @@ function renderPool() {
     el.style.setProperty('--d', d.toFixed(3)); el.style.setProperty('--ink', (d * 0.9).toFixed(2) + 'px');
     cin.children[3].style.display = d > 0.03 ? 'block' : 'none';
     var side = (parseInt(n.id.slice(-2), 36) % 2) ? 1 : -1;
-    el.style.opacity = (1 - 0.4 * d).toFixed(2); el.style.filter = 'drop-shadow(0 ' + (3 - 1.5 * d).toFixed(1) + 'px ' + (5 - 2 * d).toFixed(1) + 'px rgba(0,30,50,' + (0.4 - 0.2 * d).toFixed(2) + '))' + (now && now.id === n.id ? ' drop-shadow(0 0 3px #4dabf7) drop-shadow(0 0 9px rgba(77,171,247,.8))' : '');
+    el.style.opacity = (1 - 0.4 * d).toFixed(2); el.style.filter = 'drop-shadow(0 1px 1.5px rgba(0,30,50,' + (0.3 - 0.15 * d).toFixed(2) + '))' + (now && now.id === n.id ? ' drop-shadow(0 0 3px #4dabf7) drop-shadow(0 0 9px rgba(77,171,247,.8))' : '');
     el.style.transform = 'translateY(' + (d * 7).toFixed(1) + 'px) rotate(' + (side * d * 6).toFixed(1) + 'deg) scale(' + (1 - 0.12 * d).toFixed(3) + ')';
     cin.children[2].textContent = (n.due ? dueLabel(n) : ago(n.updated)) + (d > 0.85 ? ' \u00b7 sinking' : d > 0.5 ? ' \u00b7 soaked' : d > 0.2 ? ' \u00b7 damp' : '');
     el.title = d > 0.05 ? (n.due ? 'Deadline ' + n.due + ': the closer it gets, the wetter the paper.' : 'Untouched for a while. Open or edit it to dry it off.') : '';
@@ -375,7 +402,8 @@ function stepCards() {
     var sx = (hr - hl) / (2 * hw), sy = (hb - ht) / (2 * hh);
     if (!dragging) {
       var ex = (hr * hr - hl * hl) / (2 * hw), ey = (hb * hb - ht * ht) / (2 * hh);                // wave energy gradient pushes the paper away from the waves
-      s.vx = (s.vx + (-ex * FLOAT.push - sx * FLOAT.slope) * dt) * FLOAT.drag; s.vy = (s.vy + (-ey * FLOAT.push - sy * FLOAT.slope) * dt) * FLOAT.drag;
+      var gr = clampv((t0 - (s.settle || 0)) / 2000, 0, 1); gr *= gr;                                                          // just let go: the water takes a moment to start pushing again
+      s.vx = (s.vx + (-ex * FLOAT.push - sx * FLOAT.slope) * gr * dt) * FLOAT.drag; s.vy = (s.vy + (-ey * FLOAT.push - sy * FLOAT.slope) * gr * dt) * FLOAT.drag;
       var sp = Math.hypot(s.vx, s.vy); if (sp > FLOAT.vmax) { s.vx *= FLOAT.vmax / sp; s.vy *= FLOAT.vmax / sp; }
       if (!n.pinned) {
         s.ox += s.vx * dt; s.oy += s.vy * dt;
@@ -385,16 +413,70 @@ function stepCards() {
         if (sp < 3 && (Math.abs(s.ox) > 4 || Math.abs(s.oy) > 4)) { if (++s.calm > 30) { commitDrift(id); s.calm = 0; } } else s.calm = 0;     // settled: remember the new place
       }
       var shear = ((Water.sample(cx + hw, cy + hh) - Water.sample(cx - hw, cy + hh)) - (Water.sample(cx + hw, cy - hh) - Water.sample(cx - hw, cy - hh))) / (2 * hw);
-      s.wz = (s.wz + (shear * FLOAT.torque - s.rz * 3) * dt) * 0.96; s.rz = clampv(s.rz + s.wz * dt, -35, 35);                   // twist, and slowly straighten out
+      s.wz = (s.wz + (shear * FLOAT.torque * gr - s.rz * 3) * dt) * 0.96; s.rz = clampv(s.rz + s.wz * dt, -35, 35);                   // twist, and slowly straighten out
     }
     s.tx += (clampv(-Math.atan(sy * FLOAT.tilt * 10) * 57.3, -26, 26) - s.tx) * 0.35; s.ty += (clampv(Math.atan(sx * FLOAT.tilt * 10) * 57.3, -26, 26) - s.ty) * 0.35;
     var bob = Math.sin(t * 1.3 + s.ph) * 1.6, sway = Math.sin(t * 0.9 + s.ph * 1.7) * 0.9;                                   // never completely still
+    s.dax = dragging ? 0 : s.tx * amp + Math.sin(t * 1.1 + s.ph) * 1.2; s.day = dragging ? 0 : s.ty * amp + Math.sin(t * 0.8 + s.ph * 2) * 1.2; s.daz = dragging ? 0 : s.rz * amp + sway; s.dsc = 1 + clampv(hc * 0.0016, -0.05, 0.05);
     cin.style.transform = dragging ? '' : 'translate(' + s.ox.toFixed(1) + 'px,' + (s.oy + bob - clampv(hc * FLOAT.lift, -5, 5)).toFixed(1) + 'px) perspective(700px) rotateX(' +
       (s.tx * amp + Math.sin(t * 1.1 + s.ph) * 1.2).toFixed(2) + 'deg) rotateY(' + (s.ty * amp + Math.sin(t * 0.8 + s.ph * 2) * 1.2).toFixed(2) + 'deg) rotateZ(' + (s.rz * amp + sway).toFixed(2) +
       'deg) scale(' + (1 + clampv(hc * 0.0016, -0.05, 0.05)).toFixed(3) + ')';
   });
 }
 Water.onStep(stepCards);
+var SH_O = [0, 0];
+// outline of a card (rounded corners, rough edge when wet), as points around its centre
+function cardOutline(id, d) {
+  var j = Paper.style(id).jit, k = 0.5 + d * 1.6, hw = CWD / 2, hh = CHT / 2, r = 12, cs = [[1, -1], [1, 1], [-1, 1], [-1, -1]], arcs = [], pts = [], q = 0, c, a, ang, cx, cy, jv, i;
+  for (c = 0; c < 4; c++) {
+    cx = cs[c][0] * (hw - r); cy = cs[c][1] * (hh - r); arcs[c] = [];
+    for (a = 0; a <= 4; a++) { ang = (-90 + c * 90 + a * 22.5) * Math.PI / 180; jv = j[q++ % 40] * k * 0.9; arcs[c].push([cx + (r + jv) * Math.cos(ang), cy + (r + jv) * Math.sin(ang)]); }
+  }
+  for (c = 0; c < 4; c++) {
+    var A = arcs[c], B = arcs[(c + 1) % 4], e = A[A.length - 1], f = B[0];
+    for (i = 0; i < A.length; i++) pts.push(A[i]);
+    for (i = 1; i <= 3; i++) { jv = j[q++ % 40] * k * 0.9; var u = i / 4, mx = e[0] + (f[0] - e[0]) * u, my = e[1] + (f[1] - e[1]) * u, nl = Math.sqrt(mx * mx / (hw * hw) + my * my / (hh * hh)) || 1; pts.push([mx + jv * mx / (hw * nl) * 0.6, my + jv * my / (hh * nl) * 0.6]); }
+  }
+  return pts;
+}
+// the shadow follows the real paper: its outline, tilt and twist, its height above the floor, and the way the rippling surface bends the view of the floor.
+// Dry paper floats high and throws a soft offset shadow. Wet paper sits lower: a tighter shadow that gets diffuse, faint and wobbly as it soaks and sinks.
+function drawShadows(ctx) {
+  if (!poolMode || !unlocked || document.body.classList.contains('focusing')) return;
+  var dpr = Water.canvas.width / Math.max(1, window.innerWidth), FAR = 4000, RAD = Math.PI / 180;
+  Object.keys(cardEls).forEach(function (id) {
+    var el = cardEls[id], s = phys[id] || { ox: 0, oy: 0, dax: 0, day: 0, daz: 0, dsc: 1 };
+    var left = parseFloat(el.style.left), top = parseFloat(el.style.top); if (isNaN(left) || isNaN(top)) return;
+    var dragging = el.classList.contains('drag'), d = parseFloat(el.style.getPropertyValue('--d')) || 0, op = parseFloat(el.style.opacity); if (isNaN(op)) op = 1;
+    var side = (parseInt(id.slice(-2), 36) % 2) ? 1 : -1, ecx = left + CWD / 2, ecy = top + CHT / 2;
+    var L = Water.shadowDir(ecx + s.ox, ecy + s.oy), sunk = d > 0.85 ? Math.min(1, (d - 0.85) / 0.15) : 0;
+    var lift = (dragging ? 36 : 20) * (1 - 0.8 * d), wob = dragging ? 0.6 : 1 + 1.2 * d + sunk;
+    var ax = dragging ? 0 : s.dax * RAD, ay = dragging ? 0 : s.day * RAD, az = dragging ? 0 : s.daz * RAD, sc = dragging ? 1 : s.dsc;
+    var esc = dragging ? 1.05 : 1 - 0.12 * d, erot = dragging ? 0 : side * d * 6 * RAD, ety = dragging ? 0 : d * 7;
+    var cax = Math.cos(ax), sax = Math.sin(ax), cay = Math.cos(ay), say = Math.sin(ay), caz = Math.cos(az), saz = Math.sin(az), cer = Math.cos(erot), ser = Math.sin(erot);
+    var ox = dragging ? 0 : s.ox, oy = dragging ? 0 : s.oy, pts = cardOutline(id, d), path = [], i, wm = 5 + 5 * d + 3 * sunk;
+    for (i = 0; i < pts.length; i++) {
+      var x = pts[i][0] * sc, y = pts[i][1] * sc, x1 = x * caz - y * saz, y1 = x * saz + y * caz;            // rotateZ
+      var x2 = x1 * cay, z2 = -x1 * say;                                                                       // rotateY
+      var y3 = y1 * cax - z2 * sax, z3 = y1 * sax + z2 * cax, pf = 700 / (700 - z3);                          // rotateX, perspective
+      var px = (x2 * pf + ox) * esc, py = (y3 * pf + oy) * esc, rx = px * cer - py * ser, ry = px * ser + py * cer + ety;
+      var h = lift + z3 * 0.45; if (h < 1) h = 1;                                                              // raised corners throw longer shadows
+      var wx = ecx + rx + L.x * h * L.len * 1.4, wy = ecy + ry + L.y * h * L.len * 1.4;
+      Water.refract(wx, wy, SH_O);
+      var wxo = SH_O[0] * wob, wyo = SH_O[1] * wob; wxo = wxo > wm ? wm : wxo < -wm ? -wm : wxo; wyo = wyo > wm ? wm : wyo < -wm ? -wm : wyo;
+      path.push(wx + wxo, wy + wyo);
+    }
+    var a = op * L.k * (0.4 - 0.1 * d + sunk * 0.06), soft = 7 + lift * 0.5 + d * 12 + sunk * 6, tight = d < 0.7 ? a * 0.75 * (1 - d / 0.7) : 0;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(path[0] - FAR, path[1]);
+    for (i = 2; i < path.length; i += 2) ctx.lineTo(path[i] - FAR, path[i + 1]);
+    ctx.closePath(); ctx.fillStyle = '#000';
+    ctx.shadowColor = 'rgba(' + Math.round(sunk * 4) + ',' + Math.round(16 + sunk * 30) + ',' + Math.round(28 + sunk * 32) + ',' + Math.min(0.9, a).toFixed(3) + ')';
+    ctx.shadowBlur = soft * dpr; ctx.shadowOffsetX = FAR * dpr; ctx.shadowOffsetY = 0; ctx.fill();
+    if (tight > 0.01) { ctx.shadowColor = 'rgba(0,16,28,' + tight.toFixed(3) + ')'; ctx.shadowBlur = 2.5 * dpr; ctx.shadowOffsetX = (FAR - L.x * lift * 0.3) * dpr; ctx.shadowOffsetY = -L.y * lift * 0.3 * dpr; ctx.fill(); }
+    ctx.restore();
+  });
+}
+Water.onDraw(drawShadows);
 function setPool(on) {
   poolMode = on; prefs.pool = on; savePrefs();
   $('pool').hidden = !on; $('poolb').textContent = on ? 'List view' : 'Pool view';

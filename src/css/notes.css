@@ -43,7 +43,7 @@
   .setbox input[type=checkbox] { width: 22px; height: 22px; }
   .syncbox { gap: 6px; }
   .syncbox input { min-height: 40px; padding: 8px 9px; font-size: 14px; }
-  .sync-actions button, .setbox > button { min-height: 38px; font-size: 13px; }
+  .sync-actions button, .setsec > button { min-height: 38px; font-size: 13px; }
   .sfoot { flex-wrap: wrap; padding: 8px 10px; }
   .sfoot button { flex: 1 1 auto; min-height: 38px; padding: 7px 10px; }
   .main { min-height: 0; padding: 10px; gap: 8px; }
@@ -92,7 +92,7 @@
 .app.settings-open .setbox select { min-height: 42px; font-size: 15px; }
 .app.settings-open .setbox input[type=checkbox] { width: 24px; height: 24px; }
 .app.settings-open .syncbox input { min-height: 42px; font-size: 15px; }
-.app.settings-open .setbox > button, .app.settings-open .sync-actions button { min-height: 42px; font-size: 14px; }
+.app.settings-open .setsec > button, .app.settings-open .sync-actions button { min-height: 42px; font-size: 14px; }
 .app.light.settings-open .setbox, .app.light.settings-open .sethead { background: rgba(244,250,252,.98); }
 .setbox label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .setbox select { flex: 1; max-width: 62%; }
@@ -135,3 +135,7 @@ body.focusing .tog { display: none; }
 .app .swb.none { background: transparent; border: 2px solid rgba(255,255,255,.55); font-size: 12px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
 .app .swb.none.sel { border-color: #fff; background: rgba(255,255,255,.2); }
 .app.light .swb.none { border-color: rgba(0,40,70,.5); } .app.light .swb.none.sel { border-color: #0a2a3c; background: rgba(0,50,80,.12); }
+
+.setsec { display: grid; gap: 8px; } .setsec[hidden] { display: none; }
+.settabs { display: flex; gap: 6px; } .settabs button { flex: 1; min-height: 36px; }
+.app.settings-open .settabs button { min-height: 42px; font-size: 15px; }

@@ -26,6 +26,8 @@
     <div class="impbox" id="impbox" hidden><textarea id="imp" placeholder="Paste backup text here"></textarea><div class="sfoot"><button class="pri" id="mergeb">Merge</button><button id="cancelb">Cancel</button></div></div>
     <div class="setbox" id="setbox" hidden>
       <div class="sethead"><strong>Settings</strong><button id="setclose">Done</button></div>
+      <div class="settabs"><button class="pri" id="settabn">Notes</button><button id="settabp">Pool</button></div>
+      <div class="setsec" id="setnotes">
       <label>Theme <select id="theme"><option value="water">Water glass</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
       <label>Font size <input id="fs" type="range" min="12" max="24" step="1"><span id="fsv"></span></label>
       <label>Tag colors <select id="tagmode"><option value="auto">Auto</option><option value="none">None</option></select></label>
@@ -50,6 +52,15 @@
         <div class="chnote">The old passphrase stops working. With sync on, your other devices ask for the new one once, so let them finish syncing first.</div>
         <div class="chrow"><button class="pri" id="chgo">Change</button><button id="chcancel">Cancel</button></div>
         <div class="chm" id="chm"></div>
+      </div>
+      </div>
+      <div class="setsec" id="setpool" hidden>
+        <label>Style <select id="wstyle"><option value="pool">Swimming pool</option><option value="pond">Koi pond</option></select></label>
+        <label>Night pool <input id="nightc" type="checkbox"></label>
+        <label>Rain <input id="rainc" type="checkbox"></label>
+        <label>Koi fish <input id="koic" type="checkbox"></label>
+        <label>Lily pads (pond) <input id="padsc" type="checkbox"></label>
+        <label>Depth shading <input id="depthc" type="checkbox"></label>
       </div>
     </div>
     <div class="sfoot"><button id="expb" title="Copies your notes as plain, unencrypted text">Export (plain text)</button><button id="impb">Import</button><button id="setb">Settings</button></div>
